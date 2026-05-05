@@ -1,36 +1,16 @@
-export type Impact = 'high' | 'medium' | 'low';
+export interface BrandAsset {
+  medium: 'Billboard' | 'Newspaper' | 'Social Post';
+  tagline: string;
+  imagePrompt: string;
+  imageUrl?: string;
+  loading?: boolean;
+}
 
-export interface ProCon {
-  item: string;
-  type: 'pro' | 'con';
-  impact: Impact;
+export interface BrandProfile {
+  productName: string;
   description: string;
-}
-
-export interface SWOT {
-  strengths: string[];
-  weaknesses: string[];
-  opportunities: string[];
-  threats: string[];
-}
-
-export interface ComparisonRow {
-  criterion: string;
-  option1Value: string;
-  option2Value: string;
-  score1: number; // 1-10
-  score2: number; // 1-10
-  winner: string;
-}
-
-export interface DecisionAnalysis {
-  prosCons: ProCon[];
-  swot: SWOT;
-  comparison?: ComparisonRow[];
-  summary: string;
-  recommendation: string;
-  options?: {
-    alpha: string;
-    beta: string;
-  };
+  visualIdentity: string;
+  targetAudience: string;
+  brandVoice: string;
+  assets: BrandAsset[];
 }

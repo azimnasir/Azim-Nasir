@@ -1,82 +1,58 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { DecisionAnalysis } from "../types";
+import { BrandProfile } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-export async function analyzeDecision(decision: string, option1?: string, option2?: string): Promise<DecisionAnalysis> {
-  const isComparison = option1 && option2;
+export async function generateBrandProfile(productName: string, description: string): Promise<BrandProfile> {
+  const prompt = `Create a brand profile and advertising assets for the following product: "${productName}". 
+  Description: "${description}"
   
-  const prompt = isComparison 
-    ? `Analyze the decision between "${option1}" and "${option2}" for the context: "${decision}".`
-    : `Analyze the following decision: "${decision}".`;
+  Generate 3 specific advertising assets for these mediums:
+  1. Billboard
+  2. Newspaper
+  3. Social Post
+  
+  For each asset, provide a catchy tagline and a highly detailed image generation prompt that describes the product in that specific environment. 
+  Ensure the visual description of the product is consistent across all image prompts so the generated images look like the same product.`;
 
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
     contents: prompt,
     config: {
-      systemInstruction: `You are "The Tiebreaker", an elite decision-making engine developed with clinical objectivity. Your purpose is to provide structured, unemotional analysis for complex dilemmas.
+      systemInstruction: `You are "The Brand Builder", an expert creative director and brand strategist. 
+      Your goal is to transform a product description into a cohesive brand identity and imaginative advertising campaign.
       
       Structural Requirements:
-      1. Pros/Cons: Identify 3-5 critical factors of both positive and negative nature. Assign impact based on long-term consequences.
-      2. SWOT: Conduct a thorough Strengths, Weaknesses, Opportunities, and Threats matrix.
-      3. Comparison: ONLY if two distinct options are provided, construct a comparative matrix evaluating both against 5-7 metrics. Use 'Option Alpha' and 'Option Beta' as internal identifiers for the comparison winner field if the options are named such in the user input, or use the literal option names.
-      4. Summary: A 2-3 sentence clinical synthesis of the situation.
-      5. Recommendation: A definitive, bold verdict.
-      
-      Tone: Absolute, precise, and sophisticated. Avoid colloquialisms.`,
+      1. visualIdentity: Describe the core visual style of the product (colors, materials, aesthetic).
+      2. targetAudience: Define who this product is for.
+      3. brandVoice: Describe how the brand speaks.
+      4. assets: A list of 3 assets (Billboard, Newspaper, Social Post).
+         - medium: One of "Billboard", "Newspaper", "Social Post"
+         - tagline: A catchy, high-impact headline.
+         - imagePrompt: A 3-4 sentence detailed prompt for an image generator (like Imagen). Focus on composition, lighting, and the product's placement in the medium's context.`,
       responseMimeType: "application/json",
       responseSchema: {
         type: Type.OBJECT,
         properties: {
-          prosCons: {
+          productName: { type: Type.STRING },
+          description: { type: Type.STRING },
+          visualIdentity: { type: Type.STRING },
+          targetAudience: { type: Type.STRING },
+          brandVoice: { type: Type.STRING },
+          assets: {
             type: Type.ARRAY,
             items: {
               type: Type.OBJECT,
               properties: {
-                item: { type: Type.STRING },
-                type: { type: Type.STRING, enum: ["pro", "con"] },
-                impact: { type: Type.STRING, enum: ["high", "medium", "low"] },
-                description: { type: Type.STRING }
+                medium: { type: Type.STRING, enum: ["Billboard", "Newspaper", "Social Post"] },
+                tagline: { type: Type.STRING },
+                imagePrompt: { type: Type.STRING }
               },
-              required: ["item", "type", "impact", "description"]
-            }
-          },
-          swot: {
-            type: Type.OBJECT,
-            properties: {
-              strengths: { type: Type.ARRAY, items: { type: Type.STRING } },
-              weaknesses: { type: Type.ARRAY, items: { type: Type.STRING } },
-              opportunities: { type: Type.ARRAY, items: { type: Type.STRING } },
-              threats: { type: Type.ARRAY, items: { type: Type.STRING } }
-            },
-            required: ["strengths", "weaknesses", "opportunities", "threats"]
-          },
-          comparison: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                criterion: { type: Type.STRING },
-                option1Value: { type: Type.STRING },
-                option2Value: { type: Type.STRING },
-                score1: { type: Type.NUMBER },
-                score2: { type: Type.NUMBER },
-                winner: { type: Type.STRING }
-              },
-              required: ["criterion", "option1Value", "option2Value", "score1", "score2", "winner"]
-            }
-          },
-          summary: { type: Type.STRING },
-          recommendation: { type: Type.STRING },
-          options: {
-            type: Type.OBJECT,
-            properties: {
-              alpha: { type: Type.STRING },
-              beta: { type: Type.STRING }
+              required: ["medium", "tagline", "imagePrompt"]
             }
           }
         },
-        required: ["prosCons", "swot", "summary", "recommendation"]
+        required: ["productName", "description", "visualIdentity", "targetAudience", "brandVoice", "assets"]
       }
     }
   });
@@ -84,5 +60,31 @@ export async function analyzeDecision(decision: string, option1?: string, option
   const text = response.text;
   if (!text) throw new Error("No response from AI");
   
-  return JSON.parse(text) as DecisionAnalysis;
+  return JSON.parse(text) as BrandProfile;
+}
+
+export async function generateBrandImage(prompt: string): Promise<string> {
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.5-flash-image',
+    contents: {
+      parts: [
+        {
+          text: prompt,
+        },
+      ],
+    },
+    config: {
+      imageConfig: {
+        aspectRatio: "16:9",
+      },
+    },
+  });
+
+  for (const part of response.candidates?.[0]?.content?.parts || []) {
+    if (part.inlineData) {
+      return `data:image/png;base64,${part.inlineData.data}`;
+    }
+  }
+
+  throw new Error("Failed to generate image");
 }

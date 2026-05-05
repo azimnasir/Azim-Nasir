@@ -1,5 +1,5 @@
 import React from 'react';
-import { Scale } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 export function Header() {
   return (
@@ -7,17 +7,17 @@ export function Header() {
       <div className="max-w-6xl mx-auto flex justify-between items-end">
         <div className="flex flex-col group cursor-default">
           <h1 className="font-serif text-3xl text-gray-100 italic tracking-tight transition-colors group-hover:text-amber-500">
-            The Tiebreaker <span className="text-[10px] not-italic font-sans text-gray-600 ml-2">by Azim Nasir</span>
+            Brand Builder <span className="text-[10px] not-italic font-sans text-gray-600 ml-2">by Azim Nasir</span>
           </h1>
           <span className="font-mono text-[10px] uppercase tracking-[0.2em] font-bold text-amber-500 mt-1">
-            Analytical Decision Engine
+            Visual Imagination Engine
           </span>
         </div>
         
         <nav className="hidden md:flex gap-10 font-mono text-[10px] uppercase tracking-[0.2em] text-gray-500">
-          <a href="#" className="hover:text-amber-500 transition-colors border-b border-transparent hover:border-amber-500 pb-1">Refine</a>
-          <a href="#" className="hover:text-amber-500 transition-colors border-b border-transparent hover:border-amber-500 pb-1">Methodology</a>
-          <a href="#" className="hover:text-amber-500 transition-colors border-b border-transparent hover:border-amber-500 pb-1">Archive</a>
+          <a href="#" className="hover:text-amber-500 transition-colors border-b border-transparent hover:border-amber-500 pb-1">Showcase</a>
+          <a href="#" className="hover:text-amber-500 transition-colors border-b border-transparent hover:border-amber-500 pb-1">AI Models</a>
+          <a href="#" className="hover:text-amber-500 transition-colors border-b border-transparent hover:border-amber-500 pb-1">About</a>
         </nav>
       </div>
     </header>
